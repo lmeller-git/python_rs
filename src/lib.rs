@@ -25,4 +25,16 @@ mod tests {
             .collect::<Vec<_>>();
         assert_eq!(res1, [3, 1, 3, 6]);
     }
+
+    #[test]
+    fn test_large() {
+        let list = Vec::from([vec![1, 2, 3], vec![2, 3, 4], vec![3, 4, 5]]);
+        let res1 = comp![
+            comp![
+                lambda!{lambda x: x * 2 if x % 2 == 0 else 10}(x) for x in l
+            ].sum::<i32>() for l in list
+        ]
+        .sum::<i32>();
+        assert_eq!(res1, 74);
+    }
 }
