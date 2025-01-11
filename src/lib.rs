@@ -3,7 +3,7 @@ mod tests {
     use std::{any::Any, cell::RefCell, rc::Rc};
 
     //use super::*;
-    use python_macros::{comp, lambda, list, walrus};
+    use python_macros::{comp, lambda, list};
 
     #[test]
     fn it_works() {
@@ -88,22 +88,32 @@ mod tests {
             }
         }
     }
-    /*
-    #[test]
-    fn test_walrus() {
-        assert_eq!(walrus!(x = 5), 5)
-    }
 
     #[test]
-    fn list_walrus() {
+    fn list_var() {
+        let x;
         let l = list![
-            walrus!(x = vec![1, 2, 3]),
+            x = vec![1, 2, 3],
             comp![i for i in x if i % 2 == 0].collect::<Vec<_>>(),
         ];
-        let expectded = vec![
-            Rc::new(RefCell::new(walrus!(x = vec![1, 2, 3]))),
-            Rc::new(RefCell::new(vec![2])),
-        ];
+        let expected: Vec<Rc<RefCell<dyn Any>>> =
+            vec![Rc::new(RefCell::new(())), Rc::new(RefCell::new(vec![2]))];
+        assert_eq!(l.len(), expected.len());
+        for (item, expected_item) in l.iter().zip(expected.iter()) {
+            let item = item.borrow();
+            let expected_item = expected_item.borrow();
+
+            if let Some(item) = item.downcast_ref::<i32>() {
+                assert_eq!(item, expected_item.downcast_ref::<i32>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<String>() {
+                assert_eq!(item, expected_item.downcast_ref::<String>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<Vec<i32>>() {
+                assert_eq!(item, expected_item.downcast_ref::<Vec<i32>>().unwrap());
+            } else if let Some(_item) = item.downcast_ref::<()>() {
+                continue;
+            } else {
+                panic!("Unexpected type in list!");
+            }
+        }
     }
-    */
 }
