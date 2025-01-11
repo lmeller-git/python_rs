@@ -68,7 +68,6 @@ impl ToTokens for Comprehension {
                 }).flatten()
             };
         }
-        //inner = quote! {#inner.flatten()};
         tokens.extend(inner);
     }
 }

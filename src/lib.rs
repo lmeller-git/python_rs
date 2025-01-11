@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    //use super::*;
     use python_macros::{comp, lambda};
 
     #[test]
@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn test_multi_comp() {
         let list = vec![vec![1, 2, 3]; 3];
-        let res: Vec<_> = comp![x for v in list for x in v if x > 1 ].collect();
+        let res: Vec<_> = comp![x for v in list if v.len() <= 3 for x in v if x > 1 ].collect();
         assert_eq!(res, vec![2, 3, 2, 3, 2, 3]);
     }
 }
