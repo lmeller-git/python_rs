@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use std::{any::Any, cell::RefCell, rc::Rc};
+
     //use super::*;
-    use python_macros::{comp, lambda};
+    use python_macros::{comp, lambda, list};
 
     #[test]
     fn it_works() {
@@ -43,5 +45,47 @@ mod tests {
         let list = vec![vec![1, 2, 3]; 3];
         let res: Vec<_> = comp![x for v in list if v.len() <= 3 for x in v if x > 1 ].collect();
         assert_eq!(res, vec![2, 3, 2, 3, 2, 3]);
+    }
+
+    #[test]
+    fn test_list() {
+        //let l: Vec<Rc<RefCell<dyn Any>>> =
+        /*
+        let l = list![
+            1,
+            "hello".to_string(),
+            comp![x for x in [1, 2, 3] if x % 2 != 0].collect::<Vec<_>>()
+        ];
+        */
+        let l = list![
+            comp![x for x in [1, 2, 3]].collect::<Vec<i32>>(),
+            1 + 2,
+            "hello_world".to_string(),
+            lambda! {lambda x, y: x * y if x > 0 else y}(0, 5),
+        ];
+        let expected: Vec<Rc<RefCell<dyn Any>>> = vec![
+            Rc::new(RefCell::new(
+                comp![x for x in [1, 2, 3]].collect::<Vec<i32>>(),
+            )),
+            Rc::new(RefCell::new(3)),
+            Rc::new(RefCell::new("hello_world".to_string())),
+            Rc::new(RefCell::new(5)),
+        ];
+
+        assert_eq!(l.len(), expected.len());
+        for (item, expected_item) in l.iter().zip(expected.iter()) {
+            let item = item.borrow();
+            let expected_item = expected_item.borrow();
+
+            if let Some(item) = item.downcast_ref::<i32>() {
+                assert_eq!(item, expected_item.downcast_ref::<i32>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<String>() {
+                assert_eq!(item, expected_item.downcast_ref::<String>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<Vec<i32>>() {
+                assert_eq!(item, expected_item.downcast_ref::<Vec<i32>>().unwrap());
+            } else {
+                panic!("Unexpected type in list!");
+            }
+        }
     }
 }

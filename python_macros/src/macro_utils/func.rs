@@ -81,7 +81,7 @@ impl Parse for Body {
     }
 }
 
-struct IfElse {
+pub struct IfElse {
     cond: Condition,
     else_clause: Else,
 }

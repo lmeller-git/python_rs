@@ -1,7 +1,7 @@
 //TODO: standard python list, walrus operator?
 
 mod macro_utils;
-use macro_utils::{comp::Comprehension, func::LambdaFunc};
+use macro_utils::{comp::Comprehension, func::LambdaFunc, list::List};
 use quote::quote;
 use syn::parse_macro_input;
 
@@ -14,5 +14,11 @@ pub fn comp(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 #[proc_macro]
 pub fn lambda(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let c = parse_macro_input!(input as LambdaFunc);
+    quote! {#c}.into()
+}
+
+#[proc_macro]
+pub fn list(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let c = parse_macro_input!(input as List);
     quote! {#c}.into()
 }
