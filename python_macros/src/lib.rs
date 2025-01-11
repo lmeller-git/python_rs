@@ -1,3 +1,5 @@
+//TODO: standard python list, walrus operator?
+
 mod macro_utils;
 use macro_utils::{comp::Comprehension, func::LambdaFunc};
 use quote::quote;

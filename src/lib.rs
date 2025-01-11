@@ -31,10 +31,19 @@ mod tests {
         let list = Vec::from([vec![1, 2, 3], vec![2, 3, 4], vec![3, 4, 5]]);
         let res1 = comp![
             comp![
-                lambda!{lambda x: x * 2 if x % 2 == 0 else 10}(x) for x in l
+                lambda!{lambda x: x * 2 if x % 2 == 0 else 10 if x < 1000 else 0}(x) for x in l
             ].sum::<i32>() for l in list
         ]
         .sum::<i32>();
         assert_eq!(res1, 74);
+    }
+
+    #[test]
+    fn test_multi_comp() {
+        let list = vec![vec![1, 2, 3]; 3];
+        let res: Vec<_> = comp![x for v in list for x in v if x > 1 ]
+            .flatten()
+            .collect();
+        assert_eq!(res, vec![2, 3, 2, 3, 2, 3]);
     }
 }
