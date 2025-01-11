@@ -3,7 +3,7 @@ mod tests {
     use std::{any::Any, cell::RefCell, rc::Rc};
 
     //use super::*;
-    use python_macros::{comp, lambda, list};
+    use python_macros::{comp, lambda, list, walrus};
 
     #[test]
     fn it_works() {
@@ -88,4 +88,22 @@ mod tests {
             }
         }
     }
+    /*
+    #[test]
+    fn test_walrus() {
+        assert_eq!(walrus!(x = 5), 5)
+    }
+
+    #[test]
+    fn list_walrus() {
+        let l = list![
+            walrus!(x = vec![1, 2, 3]),
+            comp![i for i in x if i % 2 == 0].collect::<Vec<_>>(),
+        ];
+        let expectded = vec![
+            Rc::new(RefCell::new(walrus!(x = vec![1, 2, 3]))),
+            Rc::new(RefCell::new(vec![2])),
+        ];
+    }
+    */
 }

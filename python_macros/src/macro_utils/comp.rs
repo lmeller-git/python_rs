@@ -8,17 +8,15 @@
 // ]
 /*
 source.into_iter().flat_map(|j|{
-    (true).then(|| j.into_iter().flat_map(|k|{
-        (true).then(|| k.into_iter().flat_map(|i| {
-            (true).then(|| i.into_iter().flat_map(|x| {
+    (true).then(|| j.into_iter().filter_map(|k|{
+        (true).then(|| k.into_iter().filter_map(|i| {
+            (true).then(|| i.into_iter().filter_map(|x| {
                 (true).then(|| x)
             }))
-        })
-    }))
+        }).flatten()
+    })).flatten()
 })
 */
-//TODO allow chained for if loops
-//TODO allow else clauses in if
 
 use quote::{quote, ToTokens};
 use syn::{

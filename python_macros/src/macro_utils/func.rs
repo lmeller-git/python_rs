@@ -1,7 +1,6 @@
 //lambda args: Body
-//Body: Expr if_clauses
+//Body: Expr ifElse_clauses
 // lambda x,y: x + y if x == 0
-//TODO else
 
 use crate::macro_utils::comp::{parse_till_end, Condition};
 use quote::{quote, ToTokens};

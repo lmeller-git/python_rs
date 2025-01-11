@@ -4,14 +4,8 @@
 // --> Vec{
 //    Rc<RefCell<Expr>> (where the returned value is saved)
 //}
-// expr can be any of (Rust Expr, python_macro_expr)?
 
-//use std::{any::Any, cell::RefCell, rc::Rc};
-
-use super::{
-    comp::{parse_till_end, Comprehension, Condition},
-    //func::{IfElse, LambdaFunc},
-};
+use super::comp::parse_till_end;
 use quote::{quote, ToTokens};
 use syn::{parse::Parse, Expr, Token};
 
