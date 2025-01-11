@@ -43,10 +43,20 @@ impl Parse for Comprehension {
 impl ToTokens for Comprehension {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let expr = &self.expr;
-
-        let mut inner = quote! {#expr};
-
-        for for_if in self.for_ifs.iter().rev() {
+        let ForIf {
+            pattern,
+            gen,
+            conds,
+        } = self
+            .for_ifs
+            .last()
+            .expect("must contain at least one for_if");
+        let mut inner = quote! {
+            core::iter::IntoIterator::into_iter(#gen).filter_map(move |#pattern| {
+                (true #(&& (#conds))*).then(|| #expr)
+            })
+        };
+        for for_if in self.for_ifs.iter().rev().skip(1) {
             let ForIf {
                 pattern,
                 gen,
@@ -55,10 +65,10 @@ impl ToTokens for Comprehension {
             inner = quote! {
                 core::iter::IntoIterator::into_iter(#gen).filter_map(move |#pattern| {
                     (true #(&& (#conds))*).then(|| #inner)
-                })
+                }).flatten()
             };
         }
-
+        //inner = quote! {#inner.flatten()};
         tokens.extend(inner);
     }
 }

@@ -41,9 +41,7 @@ mod tests {
     #[test]
     fn test_multi_comp() {
         let list = vec![vec![1, 2, 3]; 3];
-        let res: Vec<_> = comp![x for v in list for x in v if x > 1 ]
-            .flatten()
-            .collect();
+        let res: Vec<_> = comp![x for v in list for x in v if x > 1 ].collect();
         assert_eq!(res, vec![2, 3, 2, 3, 2, 3]);
     }
 }
