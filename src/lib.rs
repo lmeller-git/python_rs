@@ -1,8 +1,14 @@
+use std::{cell::RefCell, rc::Rc};
+
+fn wrap<T>(d: T) -> Rc<RefCell<T>> {
+    Rc::new(RefCell::new(d))
+}
+
 #[cfg(test)]
 mod tests {
     use std::{any::Any, cell::RefCell, rc::Rc};
 
-    //use super::*;
+    use super::*;
     use python_macros::{comp, lambda, list};
 
     #[test]
@@ -115,5 +121,77 @@ mod tests {
                 panic!("Unexpected type in list!");
             }
         }
+    }
+
+    #[test]
+    fn large_list() {
+        let mut x;
+        let mut y;
+        let z;
+        let func;
+
+        let l = list![
+            x = 42,
+            func = lambda! {lambda x, y: (x + y) * 10 if x < y else x - y },
+            y = comp![x * 2 for x in 0..10 if x % 2 != 0].sum::<i32>(),
+            z = func(x, y),
+            x *= z,
+            println!("x: {}, y: {}, z: {}", x, y, z), // x: 38640, y: 50, z: 920
+            y = comp![func(x, z) for x in [x, y, z]].sum::<i32>(),
+            println!("x: {}, y: {}, z: {}", x, y, z), // x: 38640, y: 47420, z: 920
+            list![comp![lambda!{lambda a: a + k }(y) for k in [x, y, z]].collect::<Vec<i32>>()],
+        ];
+        let func = lambda! {lambda x, y: (x + y) * 10 if x < y else x - y};
+        let expected: Vec<Rc<RefCell<dyn Any>>> = vec![
+            wrap(()),
+            wrap(func),
+            wrap(30),
+            wrap(()),
+            wrap(()),
+            wrap(()),
+            wrap(()),
+            wrap(()),
+            wrap(vec![vec![38640 + 47420, 47420 + 47420, 920 + 47420]]),
+        ];
+
+        assert_eq!(func(1, 2), 30);
+
+        for (item, expected_item) in l.iter().zip(expected.iter()) {
+            let item = item.borrow();
+            let expected_item = expected_item.borrow();
+
+            if let Some(item) = item.downcast_ref::<i32>() {
+                assert_eq!(item, expected_item.downcast_ref::<i32>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<String>() {
+                assert_eq!(item, expected_item.downcast_ref::<String>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<Vec<i32>>() {
+                assert_eq!(item, expected_item.downcast_ref::<Vec<i32>>().unwrap());
+            } else if let Some(_item) = item.downcast_ref::<()>() {
+                continue;
+            } else if let Some(item) = item.downcast_ref::<Vec<i32>>() {
+                assert_eq!(item, expected_item.downcast_ref::<Vec<i32>>().unwrap());
+            } else {
+                //panic!("Unexpected type in list!");
+            }
+        }
+    }
+
+    #[test]
+    fn test_scopes() {
+        let l = {
+            let x = 0;
+            let mut y = 4;
+            vec![
+                x,
+                x + 5,
+                y,
+                {
+                    y += 4;
+                    y
+                },
+                x + y,
+            ]
+        };
+        assert_eq!(l, vec![0, 5, 4, 8, 8]);
     }
 }
