@@ -9,7 +9,7 @@ mod tests {
     use std::{any::Any, cell::RefCell, rc::Rc};
 
     use super::*;
-    use python_macros::{comp, lambda, list};
+    use python_macros::{comp, lambda, list, scoped, set};
 
     #[test]
     fn it_works() {
@@ -192,6 +192,13 @@ mod tests {
                 x + y,
             ]
         };
+
+        let t = scoped! {
+            set!(l =1)
+
+        };
+        assert_eq!(t, 1);
+
         assert_eq!(l, vec![0, 5, 4, 8, 8]);
     }
 }
