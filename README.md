@@ -1,7 +1,7 @@
 # python_rs
 Python-like syntax in Rust
 
-##usage:
+### Usage:
 ```
 comp![/*python-like list comprehension*/];
 ```
