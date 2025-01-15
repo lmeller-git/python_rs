@@ -1,2 +1,2 @@
 # python_rs
-Python Synthax in Rust
+Python-like syntax in Rust
