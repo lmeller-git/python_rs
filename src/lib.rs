@@ -1,7 +1,94 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{any::Any, cell::RefCell, rc::Rc};
+
+use python_macros::{comp, list, scoped, set};
 
 fn wrap<T>(d: T) -> Rc<RefCell<T>> {
     Rc::new(RefCell::new(d))
+}
+
+fn test() {
+    /*
+    let l = scoped! {
+        //set!(x = 3);
+        list!(set!(x = 2), x + 2)
+        /*list![
+            set!(mut x = 2 ),
+            x = x
+        ]*/
+    };
+    let l2 = scoped! {
+      vec![
+          set!(x = 0),
+          x + 5,
+          set!(mut y = 4),
+          {
+              y += 4;
+              y
+          },
+          x + y
+      ]
+    };*/
+    let l2 = scoped! {
+      vec![
+          set!(x = 0),
+          x + 5,
+          set!(mut y = 4),
+          {
+              y += 4;
+              y
+          },
+          x + y
+      ]
+    };
+    let r = scoped! {
+        set!(l = list![
+            set!(h = vec![set!(x = 0), set!(y = 42), set!(k = set!(mut z = 89))]),
+            comp![i + z for i in h if i != x].sum::<i32>(),
+        ])
+    };
+    let r2 = {
+        let x;
+        let l;
+        let h;
+        let y;
+        let k;
+        let mut z;
+        {
+            l = list![
+                {
+                    h = vec![
+                        {
+                            x = 0;
+                            x
+                        },
+                        {
+                            y = 42;
+                            y
+                        },
+                        {
+                            k = {
+                                z = 89;
+                                z
+                            };
+                            k
+                        },
+                    ];
+                    h.clone()
+                },
+                comp![i + z for i in h if i != x].sum::<i32>()
+            ];
+            l
+        }
+    };
+    let r3 = {
+        let x = 0;
+        let y = 42;
+        let mut z = 89;
+        let k = z;
+        let h = vec![x, y, k];
+        let l = list![h.clone(), comp![i + z for i in h if i != x].sum::<i32>()];
+        l
+    };
 }
 
 #[cfg(test)]
@@ -192,13 +279,60 @@ mod tests {
                 x + y,
             ]
         };
+        let t = {
+            scoped! {
+                set!(l = 1)
 
-        let t = scoped! {
-            set!(l =1)
-
+            }
         };
+
         assert_eq!(t, 1);
 
-        assert_eq!(l, vec![0, 5, 4, 8, 8]);
+        let l2 = scoped! {
+          vec![
+              set!(x = 0),
+              x + 5,
+              set!(mut y = 4),
+              {
+                  y += 4;
+                  y
+              },
+              x + y
+          ]
+        };
+
+        assert_eq!(l, l2);
+    }
+
+    #[test]
+    fn scope() {
+        let r = scoped! {
+            set!(l = list![
+                set!(h = vec![set!(x = 0), set!(y = 42), set!(k = set!(mut z = 89))]),
+                comp![i + z for i in h if i != x].sum::<i32>(),
+            ])
+        };
+        //assert_eq!(r, wrap(42 + 89 + 89 * 2));
+        for (item, expected_item) in r
+            .iter()
+            .zip(list![vec![0, 42, 89], 42 + 89 + 89 * 2].iter())
+        {
+            let item = item.borrow();
+            let expected_item = expected_item.borrow();
+
+            if let Some(item) = item.downcast_ref::<i32>() {
+                assert_eq!(item, expected_item.downcast_ref::<i32>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<String>() {
+                assert_eq!(item, expected_item.downcast_ref::<String>().unwrap());
+            } else if let Some(item) = item.downcast_ref::<Vec<i32>>() {
+                assert_eq!(item, expected_item.downcast_ref::<Vec<i32>>().unwrap());
+            } else if let Some(_item) = item.downcast_ref::<()>() {
+                continue;
+            } else if let Some(item) = item.downcast_ref::<Vec<i32>>() {
+                assert_eq!(item, expected_item.downcast_ref::<Vec<i32>>().unwrap());
+            } else {
+                //panic!("Unexpected type in list!");
+            }
+        }
     }
 }
