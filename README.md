@@ -9,7 +9,7 @@ comp![/*python-like list comprehension*/];
 lambda!{/*python like lambda function*/};
 ```
 ```
-list![/*python-like list hoilding items of type Rc<RefCell<dyn Any>>*/];
+list![/*python-like list holding items of type Rc<RefCell<dyn Any>>*/];
 ```
 ```
 scoped!{
